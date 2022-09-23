@@ -8,11 +8,12 @@ function CallPrint(code, amount, time, date) {
         '</head>\n' +
         '<body>\n' +
         '<div style="text-align: center">\n' +
+        // '<img src="http://wars.local/storage/bc934a5b3de3e65d8cef93ac9d3aee48.jpg" style="width: 200px;">\n' +
         '    <h1 style="margin: 0">WarShip</h1>\n' +
         '    <h3 style="margin: 0">Cyber Gaming ROOM</h3>\n' +
         '\n' +
         '    <h3>Код активації:</h3>\n' +
-        '    <p style="font-size: 32px; margin: 0">' + code + '</p>\n' +
+        '    <p style="font-size: 24px; margin: 0">' + code + '</p>\n' +
         '\n' +
         '    <p>Ціна: ' + amount + ' грн</p>\n' +
         '    <p>Час гри: ' + time + ' хвилин</p>\n' +
@@ -20,10 +21,13 @@ function CallPrint(code, amount, time, date) {
         '</div>\n' +
         '</body>\n' +
         '</html>');
-    WinPrint.document.close();
-    WinPrint.focus();
-    WinPrint.print();
-    WinPrint.close();
+
+    setTimeout(function () {
+        WinPrint.document.close();
+        WinPrint.focus();
+        WinPrint.print();
+        WinPrint.close();
+    }, 100);
 }
 
 $('#create-receipt').on('click', function () {

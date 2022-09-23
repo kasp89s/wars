@@ -20,5 +20,8 @@ Route::group([
     Route::crud('user', 'UserCrudController');
     Route::crud('receipts', 'ReceiptsCrudController');
     Route::any('create-receipt', [ReceiptsCrudController::class, 'createReceipt']);
+    Route::any('get-main-info', [ReceiptsCrudController::class, 'getMainInfo']);
     Route::crud('receipts-price', 'ReceiptsPriceCrudController');
+    Route::crud('bar-items', 'BarItemsCrudController');
+    Route::crud('bar-items-sold', 'BarItemsSoldCrudController');
 }); // this should be the absolute last line of this file

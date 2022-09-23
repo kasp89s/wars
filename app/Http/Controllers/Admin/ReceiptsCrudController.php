@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\ReceiptsRequest;
+use App\Models\BarItemsSold;
 use App\Models\Receipts;
 use App\Models\ReceiptsPrice;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Backpack\CRUD\app\Library\Widget;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Class ReceiptsCrudController
@@ -46,12 +48,30 @@ class ReceiptsCrudController extends CrudController
      */
     protected function setupListOperation()
     {
-        CRUD::column('created_at');
-        CRUD::column('code');
-        CRUD::column('amount');
-        CRUD::column('time');
-        CRUD::column('timeLeft');
-        CRUD::column('updated_at');
+        CRUD::addColumn([
+            'name'      => 'created_at',
+            'label'     => 'Время продажи'
+        ]);
+
+        CRUD::addColumn([
+            'name'      => 'code',
+            'label'     => 'Код активации'
+        ]);
+
+        CRUD::addColumn([
+            'name'      => 'amount',
+            'label'     => 'Цена'
+        ]);
+
+        CRUD::addColumn([
+            'name'      => 'time',
+            'label'     => 'Время'
+        ]);
+
+        CRUD::addColumn([
+            'name'      => 'timeLeft',
+            'label'     => 'Время (осталось)'
+        ]);
 
         /**
          * Columns can be defined using the fluent syntax or array syntax:
@@ -92,6 +112,12 @@ class ReceiptsCrudController extends CrudController
         $this->setupCreateOperation();
     }
 
+    /**
+     * Создание чека.
+     *
+     * @param ReceiptsRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function createReceipt(ReceiptsRequest $request) {
         $prices = ReceiptsPrice::all();
         $mapped = [];
@@ -114,6 +140,21 @@ class ReceiptsCrudController extends CrudController
             'amount' => $receipt->amount,
             'time' => $receipt->time,
             'date' => date('d.m.Y H:i', time())
+        ]);
+    }
+
+    /**
+     * Инфо для лавной.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getMainInfo()
+    {
+        return response()->json([
+            'recPerDay' => Receipts::getStatsByDay(),
+            'barPerDay' => BarItemsSold::getStatsByDay(),
+            'recTotalAmountByDay' => Receipts::getTotalAmountByDay(),
+            'barTotalAmountByDay' => BarItemsSold::getTotalAmountByDay()
         ]);
     }
 }

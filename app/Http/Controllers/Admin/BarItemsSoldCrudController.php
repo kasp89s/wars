@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Requests\ReceiptsPriceRequest;
+use App\Http\Requests\BarItemsSoldRequest;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 
 /**
- * Class ReceiptsPriceCrudController
+ * Class BarItemsSoldCrudController
  * @package App\Http\Controllers\Admin
  * @property-read \Backpack\CRUD\app\Library\CrudPanel\CrudPanel $crud
  */
-class ReceiptsPriceCrudController extends CrudController
+class BarItemsSoldCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
@@ -26,9 +26,9 @@ class ReceiptsPriceCrudController extends CrudController
      */
     public function setup()
     {
-        CRUD::setModel(\App\Models\ReceiptsPrice::class);
-        CRUD::setRoute(config('backpack.base.route_prefix') . '/receipts-price');
-        CRUD::setEntityNameStrings('receipts price', 'receipts prices');
+        CRUD::setModel(\App\Models\BarItemsSold::class);
+        CRUD::setRoute(config('backpack.base.route_prefix') . '/bar-items-sold');
+        CRUD::setEntityNameStrings('bar items sold', 'bar items solds');
     }
 
     /**
@@ -39,15 +39,16 @@ class ReceiptsPriceCrudController extends CrudController
      */
     protected function setupListOperation()
     {
-        CRUD::addColumn([
-            'name'      => 'time',
-            'label'     => 'Время (минут)'
-        ]);
 
-        CRUD::addColumn([
-            'name'      => 'price',
-            'label'     => 'Цена'
-        ]);
+        CRUD::addColumn(['name' => 'item', 'label' => "Товар"]);
+        CRUD::addColumn(['name' => 'count', 'label' => "Количество"]);
+        CRUD::addColumn(['name' => 'totalAmount', 'label' => "Стоимость"]);
+        CRUD::addColumn(['name' => 'created_at', 'label' => "Время продажи"]);
+        /**
+         * Columns can be defined using the fluent syntax or array syntax:
+         * - CRUD::column('price')->type('number');
+         * - CRUD::addColumn(['name' => 'price', 'type' => 'number']);
+         */
     }
 
     /**
@@ -58,14 +59,24 @@ class ReceiptsPriceCrudController extends CrudController
      */
     protected function setupCreateOperation()
     {
-        CRUD::setValidation(ReceiptsPriceRequest::class);
+        CRUD::setValidation(BarItemsSoldRequest::class);
 
-        $this->crud
-            ->addField(['name' => 'time', 'type' => 'number'])
-            ->setFieldLabel('time', 'Время (минуты)');
-        $this->crud
-            ->addField(['name' => 'price', 'type' => 'number'])
-            ->setFieldLabel('price', 'Цена (грн)');
+        $this->crud->addField([  // Select
+            'label'     => "Товар",
+            'type'      => 'select',
+            'name'      => 'itemId', // the db column for the foreign key
+            'model'     => "App\Models\BarItems", // related model
+            'attribute' => 'name', // foreign key attribute that is shown to user
+            'options'   => (function ($query) {
+                return $query->orderBy('id', 'DESC')->get();
+            })
+        ]);
+
+        $this->crud->addField([
+            'label'     => "Количество",
+            'type'      => 'number',
+            'name'      => 'count'
+        ]);
         /**
          * Fields can be defined using the fluent syntax or array syntax:
          * - CRUD::field('price')->type('number');

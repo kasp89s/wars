@@ -1,1 +1,22 @@
 php artisan storage:link
+
+
+CREATE TABLE IF NOT EXISTS `bar_items` (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `image` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Дамп данных таблицы `bar_items`
+--
+
+INSERT INTO `bar_items` (`id`, `name`, `image`, `amount`, `created_at`, `updated_at`) VALUES
+(1, 'Cola 0.5', '32df6c6c68b0d6979cef919db695c706.jpg', '40.00', '2022-09-23 17:51:17', '2022-09-23 18:41:30'),
+(2, 'Fanta 0.5', 'c0882463eb360737446d38bb3dfd9f1f.png', '40.00', '2022-09-23 17:53:32', '2022-09-23 18:23:39'),
+(3, 'Sprite 0.5', '1baf063208f6e3d2605e19e9ffc75400.png', '40.00', '2022-09-23 18:41:54', '2022-09-23 18:41:54'),
+(5, 'Сендвич \"Шинка\"', 'bc934a5b3de3e65d8cef93ac9d3aee48.jpg', '55.00', '2022-09-23 18:42:45', '2022-09-23 18:43:41');

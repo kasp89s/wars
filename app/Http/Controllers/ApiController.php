@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\GameUsersRequest;
+use App\Models\GameUsers;
 use App\Models\Receipts;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
 
@@ -30,7 +32,23 @@ class ApiController extends Controller
      */
     public function authByLogin(Request $request)
     {
+        $validator = Validator::make($request->json()->all(), [
+            'login' => 'required',
+            'password' => 'required',
+        ]);
 
+        if ($validator->passes()) {
+            $player = GameUsers::where('login', $request->json('login'))->first();
+
+            if (Hash::check($request->json('password'), $player->password)) {
+                // The passwords match...
+                return response()->json($player);
+            }
+
+            return response()->json(['errors' => ['error' => 'Невірний логін або пароль']]);
+        }
+
+        return response()->json(['errors' => ['error' => 'Невірний логін або пароль']]);
     }
 
     /**
@@ -69,13 +87,19 @@ class ApiController extends Controller
         ]);
 
         if ($validator->passes()) {
-            //TODO Handle your data
+            $player = GameUsers::create(
+                [
+                    'login' => $request->json('login'),
+                    'email' => $request->json('email'),
+                    'password' => Hash::make($request->json('password')),
+                ]
+            );
         } else {
             //TODO Handle your error
             return response()->json(['errors' => $validator->errors()]);
         }
 
-        return response()->json([]);
+        return response()->json(['success' => true, 'player' => $player]);
     }
 
     /**

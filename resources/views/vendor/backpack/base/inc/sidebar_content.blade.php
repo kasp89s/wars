@@ -12,3 +12,5 @@
         <i class="nav-icon la la-opencart"></i> Товары бара</a></li>
 <li class="nav-item"><a class="nav-link" href="{{ backpack_url('bar-items-sold') }}">
         <i class="nav-icon la la-cart-arrow-down"></i> Проданые товары</a></li>
+
+<li class="nav-item"><a class="nav-link" href="{{ backpack_url('game-users') }}"><i class="nav-icon la la-question"></i> Game users</a></li>

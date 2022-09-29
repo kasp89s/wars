@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\GameUsersRequest;
 use App\Models\Receipts;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\Password;
 
 class ApiController extends Controller
 {
@@ -55,11 +58,24 @@ class ApiController extends Controller
     /**
      * Регистрация.
      *
-     * @param Request $request
+     * @param GameUsersRequest $request
      */
     public function register(Request $request)
     {
+        $validator = Validator::make($request->json()->all(), [
+            'login' => 'required|unique:game_users|min:4,max:255',
+            'email' => 'required|email:rfc,dns|unique:game_users|max:255',
+            'password' => ['required', Password::min(6)],
+        ]);
 
+        if ($validator->passes()) {
+            //TODO Handle your data
+        } else {
+            //TODO Handle your error
+            return response()->json(['errors' => $validator->errors()]);
+        }
+
+        return response()->json([]);
     }
 
     /**

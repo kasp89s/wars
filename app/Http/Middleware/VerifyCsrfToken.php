@@ -18,5 +18,6 @@ class VerifyCsrfToken extends Middleware
         '/api/register',
         '/api/create',
         '/api/recovery-password',
+        '/api/deposit',
     ];
 }

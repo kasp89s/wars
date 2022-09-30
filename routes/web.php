@@ -22,6 +22,7 @@ Route::prefix('/api')->group(function () {
     Route::post('/auth-by-code', [ApiController::class, 'authByCode'])->name('api.auth-by-code');
     Route::post('/auth-by-login', [ApiController::class, 'authByLogin'])->name('api.auth-by-login');
     Route::post('/use-time', [ApiController::class, 'useTime'])->name('api.use-time');
+    Route::post('/deposit', [ApiController::class, 'deposit'])->name('api.deposit');
     Route::post('/create', [ApiController::class, 'register'])->name('api.register');
     Route::post('/recovery-password', [ApiController::class, 'recoveryPassword'])->name('api.recovery-password');
 });

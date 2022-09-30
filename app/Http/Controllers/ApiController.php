@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Http\Requests\GameUsersRequest;
+use App\Mail\RecoveryMail;
 use App\Models\GameUsers;
 use App\Models\Receipts;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 
 class ApiController extends Controller
@@ -52,25 +54,85 @@ class ApiController extends Controller
     }
 
     /**
+     * Пополнение по чеку.
+     *
+     * @param Request $request
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function deposit(Request $request)
+    {
+        $validator = Validator::make($request->json()->all(), [
+            'login' => 'required',
+            'code' => 'required',
+        ]);
+
+        if ($validator->passes()) {
+            $receipt = Receipts::where('code', $request->json('code'))->first();
+
+            if (empty($receipt->id)) {
+                return response()->json(['errors' => ['error' => 'Чек не знайдено']]);
+            }
+
+            $player = GameUsers::where('login', $request->json('login'))->first();
+            if (empty($player->id)) {
+                return response()->json(['errors' => ['error' => 'Аккаунт не знайдено']]);
+            }
+
+            $player->time = $player->time + $receipt->timeLeft;
+            $player->totalTime = $player->totalTime + $receipt->timeLeft;
+
+            $player->save();
+
+            $receipt->timeLeft = 0;
+
+            $receipt->save();
+
+            return response()->json(['success' => true, 'player' => $player]);
+        }
+
+        return response()->json(['errors' => ['error' => 'Невірний код або логін']]);
+    }
+
+    /**
      * Снятие времени.
      *
      * @param Request $request
      */
     public function useTime(Request $request)
     {
-        $receipt = Receipts::query()->where(['code' => $request->json('code')])->get()->first();
+        if (!empty($request->json('code'))) {
+            $receipt = Receipts::query()->where(['code' => $request->json('code')])->get()->first();
 
-        if ($receipt->timeLeft > $request->json('time')) {
-            $receipt->timeLeft = $request->json('time');
+            if ($receipt->timeLeft > $request->json('time')) {
+                $receipt->timeLeft = $request->json('time');
 
-            $receipt->save();
-        } else {
-            $receipt->timeLeft = $receipt->timeLeft - 1;
+                $receipt->save();
+            } else {
+                $receipt->timeLeft = $receipt->timeLeft - 1;
 
-            $receipt->save();
+                $receipt->save();
+            }
+
+            return response()->json($receipt ?? []);
         }
 
-        return response()->json($receipt ?? []);
+        if (!empty($request->json('login')))
+        {
+            $player = GameUsers::where('login', $request->json('login'))->first();
+
+            if ($player->time > $request->json('time')) {
+                $player->time = $request->json('time');
+
+                $player->save();
+            } else {
+                $player->time = $player->time - 1;
+
+                $player->save();
+            }
+
+            return response()->json(['timeLeft' => $player->time]);
+        }
     }
 
     /**
@@ -109,6 +171,30 @@ class ApiController extends Controller
      */
     public function recoveryPassword(Request $request)
     {
+        $validator = Validator::make($request->json()->all(), [
+            'email' => 'required|email:rfc,dns|max:255'
+        ]);
 
+        if ($validator->passes()) {
+            $player = GameUsers::where('email', $request->json('email'))->first();
+
+            if (empty($player->id)) {
+                return response()->json(['errors' => ['error' => 'Аккаунт не знайдено']]);
+            }
+
+            $newPassword = Str::random(6);
+            $player->password = Hash::make($newPassword);
+            $player->save();
+
+            $objDemo = new \stdClass();
+            $objDemo->receiver = $player->login;
+            $objDemo->password = $newPassword;
+
+            Mail::to($player->email)->send(new RecoveryMail($objDemo));
+
+            return response()->json(['success' => $newPassword]);
+        }
+
+        return response()->json(['errors' => $validator->errors()]);
     }
 }

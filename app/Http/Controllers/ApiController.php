@@ -106,10 +106,12 @@ class ApiController extends Controller
 
             if ($receipt->timeLeft > $request->json('time')) {
                 $receipt->timeLeft = $request->json('time');
-
+                $receipt->updated_at = date('Y-m-d H:i:s', time());
                 $receipt->save();
             } else {
                 $receipt->timeLeft = $receipt->timeLeft - 1;
+
+                $receipt->updated_at = date('Y-m-d H:i:s', time());
 
                 $receipt->save();
             }
@@ -123,10 +125,12 @@ class ApiController extends Controller
 
             if ($player->time > $request->json('time')) {
                 $player->time = $request->json('time');
+                $player->updated_at = date('Y-m-d H:i:s', time());
 
                 $player->save();
             } else {
                 $player->time = $player->time - 1;
+                $player->updated_at = date('Y-m-d H:i:s', time());
 
                 $player->save();
             }

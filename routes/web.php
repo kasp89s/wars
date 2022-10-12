@@ -25,4 +25,5 @@ Route::prefix('/api')->group(function () {
     Route::post('/deposit', [ApiController::class, 'deposit'])->name('api.deposit');
     Route::post('/create', [ApiController::class, 'register'])->name('api.register');
     Route::post('/recovery-password', [ApiController::class, 'recoveryPassword'])->name('api.recovery-password');
+    Route::post('/logout', [ApiController::class, 'logout'])->name('api.logout');
 });

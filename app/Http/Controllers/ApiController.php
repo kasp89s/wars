@@ -22,7 +22,10 @@ class ApiController extends Controller
      */
     public function authByCode(Request $request)
     {
-        $receipt = Receipts::query()->where(['code' => $request->json('code')])->get()->first();
+        $receipt = Receipts::query()
+            ->where(['code' => $request->json('code')])
+            ->where('updated_at', '<', date('Y-m-d H:i:s', strtotime("-5 min")))
+            ->get()->first();
 
         return response()->json($receipt ?? []);
     }
@@ -40,7 +43,9 @@ class ApiController extends Controller
         ]);
 
         if ($validator->passes()) {
-            $player = GameUsers::where('login', $request->json('login'))->first();
+            $player = GameUsers::where('login', $request->json('login'))
+                ->where('updated_at', '<', date('Y-m-d H:i:s', strtotime("-5 min")))
+                ->first();
 
             if (Hash::check($request->json('password'), $player->password)) {
                 // The passwords match...
@@ -137,6 +142,32 @@ class ApiController extends Controller
 
             return response()->json(['timeLeft' => $player->time]);
         }
+    }
+
+    /**
+     * Закрыть сессию.
+     *
+     * @param Request $request
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function logout(Request $request)
+    {
+        if (!empty($request->json('code'))) {
+            $receipt = Receipts::query()->where(['code' => $request->json('code')])->get()->first();
+
+            $receipt->updated_at = date('Y-m-d H:i:s', strtotime("-1 hour"));
+            $receipt->save();
+        }
+
+        if (!empty($request->json('login'))) {
+            $player = GameUsers::where('login', $request->json('login'))->first();
+
+            $player->updated_at = date('Y-m-d H:i:s', strtotime("-1 hour"));
+            $player->save();
+        }
+
+        return response()->json([]);
     }
 
     /**

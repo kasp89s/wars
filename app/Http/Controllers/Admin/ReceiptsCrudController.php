@@ -132,7 +132,7 @@ class ReceiptsCrudController extends CrudController
         $receipt->time = $request->input('time');
         $receipt->timeLeft = $request->input('time');
         $receipt->created_at = time();
-        $receipt->updated_at = time();
+        $receipt->updated_at = time() - 600;
         $receipt->save();
 
         return response()->json([

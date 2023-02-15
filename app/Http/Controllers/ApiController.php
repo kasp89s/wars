@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\GameUsersRequest;
 use App\Mail\RecoveryMail;
 use App\Models\GameUsers;
+use App\Models\Machines;
 use App\Models\Receipts;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -23,8 +24,8 @@ class ApiController extends Controller
     public function authByCode(Request $request)
     {
         $receipt = Receipts::query()
-            ->where(['code' => $request->json('code')])
-            ->where('updated_at', '<', date('Y-m-d H:i:s', strtotime("-5 min")))
+            ->where(['code' => strtoupper($request->json('code'))])
+            ->where('updated_at', '<', date('Y-m-d H:i:s', strtotime("-2 min")))
             ->get()->first();
 
         return response()->json($receipt ?? []);
@@ -44,7 +45,7 @@ class ApiController extends Controller
 
         if ($validator->passes()) {
             $player = GameUsers::where('login', $request->json('login'))
-                ->where('updated_at', '<', date('Y-m-d H:i:s', strtotime("-5 min")))
+                ->where('updated_at', '<', date('Y-m-d H:i:s', strtotime("-2 min")))
                 ->first();
 
             if (Hash::check($request->json('password'), $player->password)) {
@@ -73,7 +74,7 @@ class ApiController extends Controller
         ]);
 
         if ($validator->passes()) {
-            $receipt = Receipts::where('code', $request->json('code'))->first();
+            $receipt = Receipts::where('code', strtoupper($request->json('code')))->first();
 
             if (empty($receipt->id)) {
                 return response()->json(['errors' => ['error' => 'Чек не знайдено']]);
@@ -86,6 +87,7 @@ class ApiController extends Controller
 
             $player->time = $player->time + $receipt->timeLeft;
             $player->totalTime = $player->totalTime + $receipt->timeLeft;
+            $player->updated_at = date('Y-m-d H:i:s', strtotime("-1 hour"));
 
             $player->save();
 
@@ -107,7 +109,7 @@ class ApiController extends Controller
     public function useTime(Request $request)
     {
         if (!empty($request->json('code'))) {
-            $receipt = Receipts::query()->where(['code' => $request->json('code')])->get()->first();
+            $receipt = Receipts::query()->where(['code' => strtoupper($request->json('code'))])->get()->first();
 
             if ($receipt->timeLeft > $request->json('time')) {
                 $receipt->timeLeft = $request->json('time');
@@ -120,6 +122,8 @@ class ApiController extends Controller
 
                 $receipt->save();
             }
+
+            Machines::updateTime($request->json('macAddress'), $receipt->timeLeft);
 
             return response()->json($receipt ?? []);
         }
@@ -140,6 +144,8 @@ class ApiController extends Controller
                 $player->save();
             }
 
+            Machines::updateTime($request->json('macAddress'), $player->time);
+
             return response()->json(['timeLeft' => $player->time]);
         }
     }
@@ -154,10 +160,12 @@ class ApiController extends Controller
     public function logout(Request $request)
     {
         if (!empty($request->json('code'))) {
-            $receipt = Receipts::query()->where(['code' => $request->json('code')])->get()->first();
+            $receipt = Receipts::query()->where(['code' => strtoupper($request->json('code'))])->get()->first();
 
             $receipt->updated_at = date('Y-m-d H:i:s', strtotime("-1 hour"));
             $receipt->save();
+
+            Machines::updateTime($request->json('macAddress'), 0);
         }
 
         if (!empty($request->json('login'))) {
@@ -165,6 +173,8 @@ class ApiController extends Controller
 
             $player->updated_at = date('Y-m-d H:i:s', strtotime("-1 hour"));
             $player->save();
+
+            Machines::updateTime($request->json('macAddress'), 0);
         }
 
         return response()->json([]);
@@ -189,6 +199,7 @@ class ApiController extends Controller
                     'login' => $request->json('login'),
                     'email' => $request->json('email'),
                     'password' => Hash::make($request->json('password')),
+                    'updated_at' => date('Y-m-d H:i:s', strtotime("-1 hour"))
                 ]
             );
         } else {

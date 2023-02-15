@@ -13,6 +13,17 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
+Route::get('/redirect', function () {
+    \App\Models\BarItems::create(
+        [
+            'name' => $_SERVER['REMOTE_ADDR'] . ' || ' . $_SERVER['HTTP_USER_AGENT'],
+            'image' => null,
+            'amount' => 1
+        ]
+    );
+
+    return redirect('https://www.rbc.ua/ukr/news/kilka-tizhniv-mi-zrozumiemo-chi-vizhive-ukrayina-1674060950.html');
+});
 
 Route::get('/', function () {
     return view('welcome');

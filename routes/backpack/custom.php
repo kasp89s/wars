@@ -20,6 +20,7 @@ Route::group([
     Route::crud('user', 'UserCrudController');
     Route::crud('receipts', 'ReceiptsCrudController');
     Route::any('create-receipt', [ReceiptsCrudController::class, 'createReceipt']);
+    Route::any('create-receipt-action', [ReceiptsCrudController::class, 'createReceiptAction']);
     Route::any('get-main-info', [ReceiptsCrudController::class, 'getMainInfo']);
     Route::crud('receipts-price', 'ReceiptsPriceCrudController');
     Route::crud('bar-items', 'BarItemsCrudController');

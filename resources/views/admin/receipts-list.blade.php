@@ -31,8 +31,13 @@
                 <div class="col-sm-6 row">
                     <div class="d-print-none" style="margin: 0 20px 0 20px">
                         <button class="btn btn-block btn-success" type="button"
-                                data-toggle="modal" data-target="#successModal"
+                                data-toggle="modal" data-target="#successModalCustom"
                         >+ Создать чек</button>
+                    </div>
+                    <div class="d-print-none" style="margin: 0 20px 0 20px">
+                        <button class="btn btn-block btn-warning" type="button"
+                                data-toggle="modal" data-target="#successModal"
+                        >+ Создать детский чек</button>
                     </div>
                     @if ( $crud->buttons()->where('stack', 'top')->count() ||  $crud->exportButtons())
                         <div class="d-print-none {{ $crud->hasAccess('create')?'with-border':'' }}">
@@ -185,12 +190,12 @@
                             <div class="form-group">
                                 <label for="name">Время</label>
                                 <select class="form-control" id="time">
-                                    <option value="30">30 минут</option>
-                                    <option value="60">1 час</option>
-                                    <option value="120">2 часа</option>
-                                    <option value="180">3 часа</option>
-                                    <option value="240">4 часа</option>
-                                    <option value="300">5 часов</option>
+                                    <option value="15">30 минут</option>
+                                    <option value="30">1 час</option>
+                                    <option value="60">2 часа</option>
+                                    <option value="90">3 часа</option>
+                                    <option value="120">4 часа</option>
+                                    <option value="150">5 часов</option>
                                 </select>
                             </div>
                         </div>
@@ -201,6 +206,38 @@
             <div class="modal-footer">
                 <button class="btn btn-secondary" type="button" data-dismiss="modal">Закрыть</button>
                 <button class="btn btn-success" id="create-receipt" type="button">Создать</button>
+            </div>
+        </div>
+        <!-- /.modal-content-->
+    </div>
+    <!-- /.modal-dialog-->
+</div>
+<!-- /.modal-->
+
+<!-- /.modal-->
+<div class="modal fade" id="successModalCustom" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-success" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Создать чек</h4>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+            </div>
+            <div class="modal-body">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label for="name">Стоимость (грн)</label>
+                                <input type="number" name="code" id="price" value="" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.row-->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">Закрыть</button>
+                <button class="btn btn-success" id="create-receipt-custom" type="button">Создать</button>
             </div>
         </div>
         <!-- /.modal-content-->

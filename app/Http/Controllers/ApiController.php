@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
+use App\Models\Discount;
 
 class ApiController extends Controller
 {
@@ -80,12 +81,30 @@ class ApiController extends Controller
                 return response()->json(['errors' => ['error' => 'Чек не знайдено']]);
             }
 
+            if (empty($receipt->timeLeft)) {
+                return response()->json(['errors' => ['error' => 'Викорисанний чек']]);
+            }
+
+            if (!empty($receipt->isAction)) {
+                return response()->json(['errors' => ['error' => 'Не можливо поповнити шкільний чек']]);
+            }
+
             $player = GameUsers::where('login', $request->json('login'))->first();
             if (empty($player->id)) {
                 return response()->json(['errors' => ['error' => 'Аккаунт не знайдено']]);
             }
 
-            $player->time = $player->time + $receipt->timeLeft;
+            $currentDiscount = Discount::where([['time', '<', $player->totalTime]])->get()->last();
+
+            $percentageDiscount = 0;
+
+            if (!empty($currentDiscount->percentage)) {
+                $percentageDiscount = $currentDiscount->percentage;
+            }
+
+            $discountAmount = ($receipt->timeLeft / 100) * $percentageDiscount;
+
+            $player->time = $player->time + $receipt->timeLeft + $discountAmount;
             $player->totalTime = $player->totalTime + $receipt->timeLeft;
             $player->updated_at = date('Y-m-d H:i:s', strtotime("-1 hour"));
 

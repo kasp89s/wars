@@ -1,4 +1,4 @@
-function CallPrint(code, amount, time, date) {
+function CallPrint(code, amount, time, date, isAction) {
     var WinPrint = window.open('','','left=50,top=50,width=800,height=640,toolbar=0,scrollbars=1,status=0');
     WinPrint.document.write('<!DOCTYPE html>\n' +
         '<html lang="en">\n' +
@@ -12,6 +12,7 @@ function CallPrint(code, amount, time, date) {
         '    <h1 style="margin: 0">WarShip</h1>\n' +
         '    <h3 style="margin: 0">Cyber Gaming ROOM</h3>\n' +
         '\n' +
+        ((isAction) ? '\n<h3>Для школярів</h3>\n' : '') +
         '    <h3>Код активації:</h3>\n' +
         '    <p style="font-size: 24px; margin: 0">' + code + '</p>\n' +
         '\n' +
@@ -30,14 +31,28 @@ function CallPrint(code, amount, time, date) {
     }, 100);
 }
 
-$('#create-receipt').on('click', function () {
+$('#create-receipt-custom').on('click', function () {
    $.post(
        '/admin/create-receipt',
        {
-           time: $('#time').val()
+           price: $('#price').val()
        },
        function (response) {
-           CallPrint(response.code, response.amount, response.time, response.date);
+           CallPrint(response.code, response.amount, response.time, response.date, response.isAction);
+           window.location.reload();
+       },
+       'json'
+   );
+});
+
+$('#create-receipt').on('click', function () {
+   $.post(
+       '/admin/create-receipt-action',
+       {
+           price: $('#time').val()
+       },
+       function (response) {
+           CallPrint(response.code, response.amount, response.time, response.date, response.isAction);
            window.location.reload();
        },
        'json'
